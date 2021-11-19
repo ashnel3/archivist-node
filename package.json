@@ -1,0 +1,75 @@
+{
+  "name": "archivist",
+  "version": "1.0.0",
+  "description": "Web archivist",
+  "bin": "bin/index.js",
+  "main": "dist/archivist.js",
+  "scripts": {
+    "start": "node bin/index.js",
+    "start:dev": "ts-node src/archivist.ts",
+    "dev": "ts-node-dev --respawn --rs src/archivist.ts",
+    "clean": "rimraf dist",
+    "build": "run-s build:typescript build:pkg",
+    "build:typescript": "tsc",
+    "build:pkg": "pkg --compress GZip --out-dir dist/bin -t node14-linux,node14-win,node14-mac .",
+    "lint": "run-p lint:es lint:typecheck",
+    "lint:es": "eslint .",
+    "lint:fix": "eslint --fix .",
+    "lint:typecheck": "tsc --noEmit",
+    "prettify": "prettier -c --write \"**/*.{js,json,ts}\"",
+    "prettify:check": "prettier --list-different \"**/*.{js,json,ts}\"",
+    "test": "echo \"Error: no test specified\""
+  },
+  "engines": {
+    "node": "<=14"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ashnel3/archivist.git"
+  },
+  "keywords": [
+    "cli",
+    "command-line",
+    "downloader",
+    "archiver"
+  ],
+  "author": "ashnel3",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/ashnel3/archivist/issues"
+  },
+  "homepage": "https://github.com/ashnel3/archivist#readme",
+  "dependencies": {
+    "axios": "^0.24.0",
+    "cfonts": "^2.10.0",
+    "commander": "^8.3.0",
+    "execa": "^5.1.1",
+    "fast-glob": "^3.2.7",
+    "mkdirp": "^1.0.4",
+    "rimraf": "^3.0.2"
+  },
+  "devDependencies": {
+    "@types/jest": "^27.0.2",
+    "@types/mkdirp": "^1.0.2",
+    "@types/node": "^16.11.7",
+    "@types/rimraf": "^3.0.2",
+    "@typescript-eslint/eslint-plugin": "^5.3.1",
+    "eslint": "^7.12.1",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-config-standard": "^16.0.3",
+    "eslint-config-standard-with-typescript": "^21.0.1",
+    "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-prettier": "^4.0.0",
+    "eslint-plugin-promise": "^4.2.1",
+    "jest": "^27.3.1",
+    "npm-run-all": "^4.1.5",
+    "pkg": "^5.4.1",
+    "prettier": "^2.4.1",
+    "semver": "^7.3.5",
+    "ts-jest": "^27.0.7",
+    "ts-node": "^10.4.0",
+    "ts-node-dev": "^1.1.8",
+    "typescript": "^4.4.4"
+  }
+}
