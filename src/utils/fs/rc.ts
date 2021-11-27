@@ -9,33 +9,37 @@ import { writeJSON, readJSON } from './json'
  * @param defaultRC
  * @returns
  */
-export const readRC = async <T = any>(path: string, def: any): Promise<[boolean, T]> => {
+export const readRC = async <T = any>(path: string, def: any): Promise<{ write: boolean; rc: T }> => {
   try {
-    return [false, await readJSON<T>(path)]
+    return { write: false, rc: await readJSON<T>(path) }
   } catch (error) {
     if ((error as any).code === 'ENOENT') {
       // Archivist directory doesn't exist
-      return [true, def]
+      return { write: true, rc: def }
     }
     // Dont overwrite on failure
     console.log((error as Error).message)
-    return [false, def]
+    return { write: false, rc: def }
   }
 }
 
-/** Remove files */
-export const remove = async (paths: string[]): Promise<void> => {
-  const r = async (p: string): Promise<void> =>
-    await new Promise((resolve, reject) => {
-      rimraf(p, (error) => {
+/** Remove files
+ * @param paths - Path globs
+ * @param opts  - Rimraf options
+ */
+export const remove = async (paths: string[], opts: rimraf.Options = {}): Promise<void> => {
+  const rimrafAsync = async (p: string): Promise<void> => {
+    return await new Promise((resolve, reject) => {
+      rimraf(p, opts, (error) => {
         if (typeof error !== 'undefined' && error !== null) {
           reject(error)
         }
         resolve()
       })
     })
+  }
   for (const p of paths) {
-    await r(p)
+    await rimrafAsync(p)
   }
 }
 

@@ -13,3 +13,6 @@ export const DEFAULT_TASK_RC: Partial<ArchivistTaskRC> = {
   run_count: 0,
   level: 5,
 }
+
+/** Archivist version */
+export const VERSION = '0.1.0'

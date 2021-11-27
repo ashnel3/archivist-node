@@ -37,50 +37,22 @@ const getTasks = (names: string[], rc: Partial<ArchivistRC>, logger: Logger): Ar
  * @returns
  */
 const parseTaskOptions = (opts: Partial<ArchivistOptions>, logger: Logger): Partial<ArchivistTaskRC> => {
-  const parseCommaSeparatedArray = (v: string): string[] => v.split(',').filter((v) => v !== '')
   return Object.entries(opts).reduce((acc: Partial<ArchivistTaskRC>, [key, value]) => {
     switch (true) {
       case key === 'enable' || key === 'disable':
+        return { ...acc, enabled: key === 'enable' }
+      case key === 'accept' || key === 'reject' || key === 'exclude':
         return {
           ...acc,
-          enabled: key === 'enable',
+          [key]: (value as string).split(',').filter((v) => v !== ''),
         }
-      case key === 'reject':
-        return {
-          ...acc,
-          reject: parseCommaSeparatedArray(value as string),
-        }
-      case key === 'accept':
-        return {
-          ...acc,
-          accept: parseCommaSeparatedArray(value as string),
-        }
-      case key === 'exclude':
-        return {
-          ...acc,
-          exclude: parseCommaSeparatedArray(value as string),
-        }
-      case key === 'interval': {
-        const interval = parseInt((value as string) ?? '', 10)
-        if (isNaN(interval)) {
-          logger('error', `unable to parse interval: ${value as string}`)
+      case key === 'interval' || key === 'level': {
+        const int = parseInt(value as string, 10)
+        if (isNaN(int)) {
+          logger('error', `failed to parse integer: ${value as string}`)
           return acc
         }
-        return {
-          ...acc,
-          interval,
-        }
-      }
-      case key === 'level': {
-        const level = parseInt((value as string) ?? '', 10)
-        if (isNaN(level)) {
-          logger('error', `unable to parse level: ${value as string}`)
-          return acc
-        }
-        return {
-          ...acc,
-          level,
-        }
+        return { ...acc, [key]: int }
       }
       default:
         return acc
@@ -137,52 +109,50 @@ export const addTask = async (
 }
 
 /**
- * Configure task
+ * Configure tasks
  * @param names - Task names
  * @param opts  - Command-line opts
  * @param rc    - Archivist rc
  */
-export const configTask = async (
+export const configTasks = async (
   names: string[],
   opts: Partial<ArchivistConfigOptions>,
   rc: Partial<ArchivistRC>,
 ): Promise<void> => {
   const logger = createLogger(opts?.debug ?? rc?.debug, opts?.quiet ?? rc?.quiet)
+  const optsRC = parseTaskOptions(opts, logger)
   const tasks = getTasks(names, rc, logger)
-  await Promise.all(
-    tasks.map(async ({ name, path }) => {
-      let [writeTaskRC, taskRC] = await readRC<Partial<ArchivistTaskRC>>(path, null)
-      if (taskRC === null) {
-        logger('error', `failed to find taskrc - ${path}`)
-        return
-      }
 
-      /** Parsed cli opts */
-      const optsRC = parseTaskOptions(opts, logger)
-      if (Object.keys(optsRC).length > 0) {
-        writeTaskRC = true
-      }
-      if (writeTaskRC) {
+  if (Object.keys(optsRC).length > 0) {
+    await Promise.all(
+      tasks.map(async ({ name, path }) => {
+        const { rc } = await readRC<Partial<ArchivistTaskRC>>(path, null)
+
+        if (rc === null) {
+          logger('error', `failed to find taskrc - ${path}`)
+          return
+        }
+
         logger('info', `configured - ${name}`)
         await writeRC<Partial<ArchivistTaskRC>>(path, {
-          ...taskRC,
+          ...rc,
           ...optsRC,
         })
-      } else {
-        logger('error', 'Config options must be specified!')
-      }
-    }),
-  )
+      }),
+    )
+  } else {
+    logger('error', 'Config options must be specified!')
+  }
 }
 
 /**
- * Remove task
+ * Remove tasks
  * @param dir   - Release directory
  * @param names - Task names
  * @param opts  - Command-line opts
  * @param rc    - Archivist rc
  */
-export const removeTask = async (
+export const removeTasks = async (
   dir: string,
   names: string[],
   opts: Partial<ArchivistRemoveOptions>,

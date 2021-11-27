@@ -29,8 +29,6 @@ export const createLogger = (debug = false, quiet = false): Logger => {
   }
   return (level, ...messages) => {
     switch (level) {
-      case 'debug':
-        return
       case 'error':
         console.error(header + 'Error: ' + messages.join(' '))
         return

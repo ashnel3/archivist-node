@@ -2,44 +2,40 @@
 
 import { join } from 'path'
 import { Command } from 'commander'
-import { addTask, configTask, removeTask } from './commands'
+import { addTask, configTasks, removeTasks } from './commands'
 import { readRC, writeRC, writeRCSync } from './utils'
-import { DEFAULT_RC, DEFAULT_TASK_RC } from './variables'
+import { DEFAULT_RC, DEFAULT_TASK_RC, VERSION } from './variables'
 import { ArchivistListOptions, ArchivistRC } from './types'
+
+export type ArchivistProcessEvent = { type: 'exit'; code: number } | { type: 'error'; error: Error }
+
+const { HOME } = process.env
 
 /** Commander app */
 const app = new Command('archivist')
-const version = '0.1.0'
+
+if (typeof HOME === 'undefined') {
+  throw new Error('Home environment variable is not set, failed to read configuration!')
+}
 
 // Main
 void (async () => {
-  const { HOME } = process.env
-
-  if (typeof HOME === 'undefined') {
-    throw new Error('Home environment variable is not set, failed to read configuration!')
-  }
-
-  /** Archivist home directory */
-  const dir = join(HOME, '.archivist')
-
-  /** .archivistrc.json path */
-  const path = join(dir, '.archivistrc.json')
-
-  /** Configuration */
-  let [doWriteRC, rc] = await readRC<ArchivistRC>(path, DEFAULT_RC)
+  const archivistDir = join(HOME, '.archivist')
+  const rcPath = join(archivistDir, '.archivistrc.json')
+  let { rc, write: __write_rc } = await readRC<ArchivistRC>(rcPath, DEFAULT_RC)
 
   /**
    * Handle process events
-   * @param event
+   * @param event - Process event
    */
-  const handleProcessEvent = (event: { type: 'exit'; code: number } | { type: 'error'; error: Error }): void => {
+  const handleProcessEvent = (event: ArchivistProcessEvent): void => {
     switch (event.type) {
       case 'error': {
         throw event.error
       }
       case 'exit': {
-        if (doWriteRC && event.code === 0) {
-          writeRCSync(path, rc)
+        if (__write_rc && event.code === 0) {
+          writeRCSync(rcPath, rc)
         }
       }
     }
@@ -51,8 +47,8 @@ void (async () => {
       'beforeAll',
       () => require('cfonts').render('archivist +', { font: 'simple', gradient: ['red', 'blue'] }).string,
     )
-    .description(`Archivist v${version} - download websites, ftp directories, executables & keep them updated.`)
-    .version(version, '--version')
+    .description(`Archivist v${VERSION} - download websites, ftp directories, executables & keep them updated.`)
+    .version(VERSION, '--version')
 
   // Add task command
   app
@@ -66,9 +62,9 @@ void (async () => {
     .option('-q, --quiet', 'disable console output')
     .option('--debug', 'Enable debug output')
     .action(async (url, name, path, opts) => {
-      const task = await addTask(dir, url, name, path, opts, rc)
+      const task = await addTask(archivistDir, url, name, path, opts, rc)
       if (task !== null) {
-        doWriteRC = true
+        __write_rc = true
         rc.tasks.push(task)
       }
     })
@@ -86,7 +82,7 @@ void (async () => {
     .option('-l, --level', 'maximum recursion depth')
     .option('-q, --quiet', 'disable console output')
     .option('--debug', 'Enable debug output')
-    .action(async (names, opts) => await configTask(names, opts, rc))
+    .action(async (names, opts) => await configTasks(names, opts, rc))
 
   // List task command
   app
@@ -106,7 +102,7 @@ void (async () => {
     .option('-c, --clean', 'Remove all downloaded files')
     .option('-q, --quiet', 'disable console output')
     .option('--debug', 'Enable debug output')
-    .action(async (names, opts) => await removeTask(dir, names, opts, rc))
+    .action(async (names, opts) => await removeTasks(archivistDir, names, opts, rc))
 
   // Run task command
   app
