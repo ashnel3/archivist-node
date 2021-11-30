@@ -28,7 +28,7 @@ export const addTask = async (
     typeof name === 'undefined'
       ? new URL(url).hostname.replace(/[/\\?@&$!:|#]/, '').replace(/\..+/g, '')
       : name
-  path = typeof path === 'undefined' ? join(dir, 'tasks', `.${name}rc.json`) : path
+  path = typeof path === 'undefined' ? join(dir, 'tasks', name, `.${name}rc.json`) : path
 
   // Check if url is valid
   if (
