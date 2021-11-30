@@ -110,8 +110,16 @@ void (async () => {
     .option('-q, --quiet', 'disable console output')
     .option('--debug', 'Enable debug output')
     .action(async (names, opts) => {
-      // TODO: remove tasks from rc
-      await removeTasks(dir, names, opts, rc)
+      const removedTasks = await removeTasks(names, opts, rc)
+
+      // Remove tasks from main rc
+      if (removeTasks.length > 1) {
+        __write_rc = true
+        removedTasks.forEach((n) => {
+          const i = rc?.tasks.findIndex((v) => v.name === n)
+          if (i > -1) rc.tasks.splice(i, 1)
+        })
+      }
     })
 
   // Run task command
