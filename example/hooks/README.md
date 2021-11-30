@@ -13,10 +13,10 @@ You can also inline these inside the task config:
   "name": "your tasks name",
   "url": "https://example.com",
   "hooks": {
-    "before": "my shell command",
-    "before-all": "This will run before all tasks",
-    "after": "This will run after the checksum",
-    "after-all": "This will run after all tasks"
+    "before": "# My shell command",
+    "before-all": "# This will run before all tasks",
+    "after": "# This will run after the checksum",
+    "after-all": "# This will run after all tasks"
   }
 }
 ```
@@ -24,7 +24,7 @@ You can also inline these inside the task config:
 ## Arguments passed to hooks
 ```bash
 # @param {boolean}  (1)      - had update     
-# @param {string[]} (1 - x)  - any new files
+# @param {string[]} (1 - x)  - updated files
 
 echo "$1"     # true
 echo "${@:2}" # updated_file.ext updated_file1.ext

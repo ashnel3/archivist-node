@@ -1,5 +1,7 @@
 .vs*
 
+test/.tmp
+
 # Logs
 logs
 *.log

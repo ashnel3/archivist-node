@@ -50,7 +50,10 @@ const readJSONSync = <T = any>(path: string, def: any = {}): T | undefined => {
  * @param def
  * @returns
  */
-export const readJSON = async <T = any>(path: string, encoding: BufferEncoding = 'utf-8'): Promise<T> => {
+export const readJSON = async <T = any>(
+  path: string,
+  encoding: BufferEncoding = 'utf-8',
+): Promise<T> => {
   return await new Promise((resolve, reject) => {
     readFile(path, encoding, (error, data) => {
       if (error !== null) {

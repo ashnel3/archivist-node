@@ -3,7 +3,7 @@
 import { join } from 'path'
 import { Command } from 'commander'
 import { addTask, configTasks, removeTasks } from './commands'
-import { readRC, writeRC, writeRCSync } from './utils'
+import { readRC, writeRC } from './utils'
 import { DEFAULT_RC, DEFAULT_TASK_RC, VERSION } from './variables'
 import { ArchivistListOptions, ArchivistRC } from './types'
 
@@ -18,10 +18,11 @@ if (typeof HOME === 'undefined') {
   throw new Error('Home environment variable is not set, failed to read configuration!')
 }
 
+const dir = join(HOME, '.archivist')
+const rcPath = join(dir, '.archivistrc.json')
+
 // Main
 void (async () => {
-  const archivistDir = join(HOME, '.archivist')
-  const rcPath = join(archivistDir, '.archivistrc.json')
   let { rc, write: __write_rc } = await readRC<ArchivistRC>(rcPath, DEFAULT_RC)
 
   /**
@@ -35,7 +36,7 @@ void (async () => {
       }
       case 'exit': {
         if (__write_rc && event.code === 0) {
-          writeRCSync(rcPath, rc)
+          writeRC.sync(rcPath, rc)
         }
       }
     }
@@ -45,9 +46,13 @@ void (async () => {
   app
     .addHelpText(
       'beforeAll',
-      () => require('cfonts').render('archivist +', { font: 'simple', gradient: ['red', 'blue'] }).string,
+      () =>
+        require('cfonts').render('archivist +', { font: 'simple', gradient: ['red', 'blue'] })
+          .string,
     )
-    .description(`Archivist v${VERSION} - download websites, ftp directories, executables & keep them updated.`)
+    .description(
+      `Archivist v${VERSION} - download websites, ftp directories, executables & keep them updated.`,
+    )
     .version(VERSION, '--version')
 
   // Add task command
@@ -62,7 +67,7 @@ void (async () => {
     .option('-q, --quiet', 'disable console output')
     .option('--debug', 'Enable debug output')
     .action(async (url, name, path, opts) => {
-      const task = await addTask(archivistDir, url, name, path, opts, rc)
+      const task = await addTask(dir, url, name, path, opts, rc)
       if (task !== null) {
         __write_rc = true
         rc.tasks.push(task)
@@ -82,7 +87,9 @@ void (async () => {
     .option('-l, --level', 'maximum recursion depth')
     .option('-q, --quiet', 'disable console output')
     .option('--debug', 'Enable debug output')
-    .action(async (names, opts) => await configTasks(names, opts, rc))
+    .action(async (names, opts) => {
+      await configTasks(names, opts, rc)
+    })
 
   // List task command
   app
@@ -102,7 +109,10 @@ void (async () => {
     .option('-c, --clean', 'Remove all downloaded files')
     .option('-q, --quiet', 'disable console output')
     .option('--debug', 'Enable debug output')
-    .action(async (names, opts) => await removeTasks(archivistDir, names, opts, rc))
+    .action(async (names, opts) => {
+      // TODO: remove tasks from rc
+      await removeTasks(dir, names, opts, rc)
+    })
 
   // Run task command
   app
@@ -117,7 +127,9 @@ void (async () => {
   // Handle process events
   process
     .on('exit', (code) => handleProcessEvent({ type: 'exit', code }))
-    .on('unhandledRejection', (error: Error, promise) => handleProcessEvent({ type: 'error', error }))
+    .on('unhandledRejection', (error: Error, promise) =>
+      handleProcessEvent({ type: 'error', error }),
+    )
 
   // Parse arguments
   await app.parseAsync(process.argv)

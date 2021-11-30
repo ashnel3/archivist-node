@@ -2,6 +2,7 @@ import { dirname } from 'path'
 import mkdirp from 'mkdirp'
 import rimraf from 'rimraf'
 import { writeJSON, readJSON } from './json'
+import { readFileSync } from 'fs'
 
 /**
  * Read & parse configuration
@@ -9,7 +10,33 @@ import { writeJSON, readJSON } from './json'
  * @param defaultRC
  * @returns
  */
-export const readRC = async <T = any>(path: string, def: any): Promise<{ write: boolean; rc: T }> => {
+const readRCSync = <T>(path: string, def: any): { write: boolean; rc: T } => {
+  try {
+    const data = readFileSync(path).toString()
+    if (typeof data === 'string') {
+      return { write: false, rc: JSON.parse(data) }
+    } else {
+      console.log(new Error(`failed to parse configuration: ${path}`))
+      return { write: false, rc: def }
+    }
+  } catch (error) {
+    if ((error as any).code === 'ENOENT') {
+      return { write: true, rc: def }
+    }
+    return { write: false, rc: def }
+  }
+}
+
+/**
+ * Read & parse configuration
+ * @param path
+ * @param defaultRC
+ * @returns
+ */
+export const readRC = async <T = any>(
+  path: string,
+  def: any,
+): Promise<{ write: boolean; rc: T }> => {
   try {
     return { write: false, rc: await readJSON<T>(path) }
   } catch (error) {
@@ -22,6 +49,7 @@ export const readRC = async <T = any>(path: string, def: any): Promise<{ write: 
     return { write: false, rc: def }
   }
 }
+readRC.sync = readRCSync
 
 /** Remove files
  * @param paths - Path globs
@@ -48,7 +76,7 @@ export const remove = async (paths: string[], opts: rimraf.Options = {}): Promis
  * @param path
  * @param rc
  */
-export const writeRCSync = (path: string, data: any): void => {
+const writeRCSync = (path: string, data: any): void => {
   try {
     mkdirp.sync(dirname(path))
     writeJSON.sync(path, JSON.stringify(data, null, 4))
@@ -70,3 +98,4 @@ export const writeRC = async <T = any>(path: string, data: T): Promise<void> => 
     console.log((error as Error).message)
   }
 }
+writeRC.sync = writeRCSync

@@ -1,6 +1,6 @@
 {
   "name": "archivist",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "Web archivist",
   "bin": "bin/index.js",
   "main": "dist/archivist.js",
@@ -8,17 +8,25 @@
     "start": "node bin/index.js",
     "start:dev": "ts-node src/archivist.ts",
     "dev": "ts-node-dev --respawn --rs src/archivist.ts",
-    "clean": "rimraf dist",
+    "clean": "rimraf coverage dist test/.tmp",
+    "clean:dist": "rimraf dist",
+    "clean:test": "rimraf test/.tmp",
+    "release": "run-s build:typescript build:pkg build:compress",
     "build": "run-s build:typescript build:pkg",
     "build:typescript": "tsc",
     "build:pkg": "pkg --compress GZip --out-dir dist/bin -t node14-linux,node14-win,node14-mac .",
+    "build:compress": "run-p build:compress-*",
+    "build:compress-bin": "cd dist/bin && node ../../scripts/compress ../archivist-v$npm_package_version *",
+    "build:compress-examples": "cd example && node ../scripts/compress ../dist/archivist-v$npm_package_version-examples *",
     "lint": "run-p lint:es lint:typecheck",
     "lint:es": "eslint .",
     "lint:fix": "eslint --fix .",
     "lint:typecheck": "tsc --noEmit",
     "prettify": "prettier -c --write \"**/*.{js,json,ts}\"",
     "prettify:check": "prettier --list-different \"**/*.{js,json,ts}\"",
-    "test": "echo \"Error: no test specified\""
+    "test": "run-s clean:test test:jest",
+    "test:dev": "jest --watch",
+    "test:jest": "jest --verbose --silent"
   },
   "engines": {
     "node": "<=14"
@@ -46,7 +54,9 @@
     "execa": "^5.1.1",
     "fast-glob": "^3.2.7",
     "mkdirp": "^1.0.4",
-    "rimraf": "^3.0.2"
+    "node-html-parser": "^5.1.0",
+    "rimraf": "^3.0.2",
+    "tar": "^6.1.11"
   },
   "devDependencies": {
     "@types/jest": "^27.0.2",
