@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-floating-promises */
-
 import { join } from 'path'
 import { addTask, configTasks, removeTasks, runTasks } from '../src/commands'
 import { exists, readRC } from '../src/utils'
@@ -30,6 +28,10 @@ const tasks = {
   config: {
     name: 'config',
     path: join(dir, 'config/configrc.json'),
+  },
+  'non-existent': {
+    name: 'non-existent',
+    path: '',
   },
 }
 
@@ -79,5 +81,40 @@ describe('archivist add', () => {
 
   test('Should fail if task exists', async () => {
     await expect(addTask(dir, url, tasks.ex1.name, tasks.ex1.path, {}, rc)).resolves.toBe(null)
+  })
+})
+
+// Config command
+describe('archivist config', () => {
+  beforeEach(() => {
+    console.log = jest.fn()
+    console.error = jest.fn()
+  })
+
+  test('should configure tasks', async () => {
+    const { name, path } = tasks.config
+    await configTasks(['config'], { disable: true }, rc)
+    await expect(readRC<Partial<ArchivistTaskRC>>(path, null)).resolves.toStrictEqual({
+      rc: {
+        ...DEFAULT_TASK_RC,
+        enabled: false,
+        interval: 50,
+        level: 2,
+        name,
+        url: url,
+      },
+      write: false,
+    })
+  })
+
+  test('should fail when no options are specified', async () => {
+    const tasks = await configTasks(['config'], {}, rc)
+
+    await expect(tasks).toStrictEqual([])
+    await expect(console.error).toHaveBeenCalled()
+  })
+
+  test("should error when task doesn't exist in rc", async () => {
+    await expect(configTasks(['config', 'non-existent'], { level: '2' }, rc)).rejects.toThrow()
   })
 })

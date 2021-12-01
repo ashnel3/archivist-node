@@ -88,7 +88,7 @@ void (async () => {
     .option('-q, --quiet', 'disable console output')
     .option('--debug', 'Enable debug output')
     .action(async (names, opts) => {
-      await configTasks(names, opts, rc)
+      const tasks = await configTasks(names, opts, rc)
     })
 
   // List task command

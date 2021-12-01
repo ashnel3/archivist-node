@@ -12,19 +12,19 @@ export const configTasks = async (
   names: string[],
   opts: Partial<ArchivistConfigOptions>,
   rc: Partial<ArchivistRC>,
-): Promise<void> => {
+): Promise<string[]> => {
   const logger = createLogger(opts?.debug ?? rc?.debug, opts?.quiet ?? rc?.quiet)
   const optsRC = parseTaskOptions(opts, logger)
   const tasks = getTasks(names, rc, logger)
 
   if (Object.keys(optsRC).length > 0) {
-    await Promise.all(
+    return await Promise.all(
       tasks.map(async ({ name, path }) => {
         const { rc } = await readRC<Partial<ArchivistTaskRC>>(path, null)
 
+        // Task is in the rc but can't be found
         if (rc === null) {
-          logger('error', `failed to find taskrc - ${path}`)
-          return
+          throw new Error(`failed to find taskrc - "${path}"`)
         }
 
         logger('info', `configured - ${name}`)
@@ -32,9 +32,11 @@ export const configTasks = async (
           ...rc,
           ...optsRC,
         })
+        return name
       }),
     )
   } else {
     logger('error', 'Config options must be specified!')
+    return []
   }
 }
