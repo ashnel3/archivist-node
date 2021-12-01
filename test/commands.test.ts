@@ -37,6 +37,11 @@ const tasks = {
 
 // Add command
 describe('archivist add', () => {
+  beforeEach(() => {
+    console.log = jest.fn()
+    console.error = jest.fn()
+  })
+
   afterAll(() => {
     rc.tasks?.push(...Object.values(tasks))
   })
@@ -77,10 +82,12 @@ describe('archivist add', () => {
 
   test('Should fail if url is invalid', async () => {
     await expect(addTask(dir, 'htt://goog.', 'test-goog', undefined, {}, rc)).resolves.toBe(null)
+    await expect(console.error).toHaveBeenCalled()
   })
 
   test('Should fail if task exists', async () => {
     await expect(addTask(dir, url, tasks.ex1.name, tasks.ex1.path, {}, rc)).resolves.toBe(null)
+    await expect(console.error).toHaveBeenCalled()
   })
 })
 
