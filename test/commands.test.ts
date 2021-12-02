@@ -20,6 +20,11 @@ const tasks = {
   ex1: {
     name: 'ex1',
     path: join(dir, 'ex1/ex1rc.json'),
+    task_rc: {
+      ...DEFAULT_TASK_RC,
+      name: 'ex1',
+      url,
+    },
   },
   ex2: {
     name: 'ex2',
@@ -28,6 +33,11 @@ const tasks = {
   config: {
     name: 'config',
     path: join(dir, 'config/configrc.json'),
+    task_rc: {
+      ...DEFAULT_TASK_RC,
+      name: 'config',
+      url,
+    },
   },
   'non-existent': {
     name: 'non-existent',
@@ -61,18 +71,16 @@ describe('archivist add', () => {
   })
 
   test('Should create a configured task', async () => {
-    const { name, path } = tasks.config
+    const { name, path, task_rc } = tasks.config
 
-    await addTask(dir, url, name, path, { interval: '50', level: '2' }, rc)
+    await addTask(dir, url, name, path, { accept: 'html,css', interval: '50' }, rc)
 
     // Check written config
     await expect(readRC<Partial<ArchivistTaskRC>>(path, null)).resolves.toStrictEqual({
       rc: {
-        ...DEFAULT_TASK_RC,
+        ...task_rc,
+        accept: ['html', 'css'],
         interval: 50,
-        level: 2,
-        name,
-        url: url,
       },
       write: false,
     })
@@ -99,16 +107,12 @@ describe('archivist config', () => {
   })
 
   test('should configure tasks', async () => {
-    const { name, path } = tasks.config
+    const { path, task_rc } = tasks.ex1
     await configTasks(['config'], { disable: true }, rc)
     await expect(readRC<Partial<ArchivistTaskRC>>(path, null)).resolves.toStrictEqual({
       rc: {
-        ...DEFAULT_TASK_RC,
+        ...task_rc,
         enabled: false,
-        interval: 50,
-        level: 2,
-        name,
-        url: url,
       },
       write: false,
     })

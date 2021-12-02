@@ -1,4 +1,2 @@
-import { getTasks } from './getTasks'
-import { parseTaskOptions } from './parseTaskOptions'
-
-export { getTasks, parseTaskOptions }
+export { getTasks } from './getTasks'
+export { parseTaskOptions } from './parseTaskOptions'
