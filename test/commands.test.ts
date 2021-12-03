@@ -108,7 +108,7 @@ describe('archivist config', () => {
 
   test('should configure tasks', async () => {
     const { path, task_rc } = tasks.ex1
-    await configTasks(['config'], { disable: true }, rc)
+    await expect(configTasks(['ex1'], { disable: true }, rc)).resolves.toStrictEqual(['ex1'])
     await expect(readRC<Partial<ArchivistTaskRC>>(path, null)).resolves.toStrictEqual({
       rc: {
         ...task_rc,
