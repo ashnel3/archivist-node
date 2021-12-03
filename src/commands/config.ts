@@ -1,3 +1,4 @@
+import { join } from 'path'
 import { createLogger, readRC, writeRC } from '../utils'
 import { getTasks, parseTaskOptions } from '../utils/command'
 import { ArchivistConfigOptions, ArchivistRC, ArchivistTaskRC } from '../types'
@@ -20,15 +21,16 @@ export const configTasks = async (
   if (Object.keys(optsRC).length > 0) {
     return await Promise.all(
       tasks.map(async ({ name, path }) => {
-        const { rc } = await readRC<Partial<ArchivistTaskRC>>(path, null)
+        const rcPath = join(path, '.taskrc.json')
+        const { rc } = await readRC<Partial<ArchivistTaskRC>>(rcPath, null)
 
         // Task is in the rc but can't be found
         if (rc === null) {
-          throw new Error(`failed to find taskrc - "${path}"`)
+          throw new Error(`failed to find taskrc - "${rcPath}"`)
         }
 
         logger('info', `configured - ${name}`)
-        await writeRC<Partial<ArchivistTaskRC>>(path, {
+        await writeRC<Partial<ArchivistTaskRC>>(rcPath, {
           ...rc,
           ...optsRC,
         })

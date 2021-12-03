@@ -19,7 +19,7 @@ const url = 'https://example.com'
 const tasks = {
   ex1: {
     name: 'ex1',
-    path: join(dir, 'ex1/ex1rc.json'),
+    path: join(dir, 'ex1'),
     task_rc: {
       ...DEFAULT_TASK_RC,
       name: 'ex1',
@@ -28,11 +28,11 @@ const tasks = {
   },
   ex2: {
     name: 'ex2',
-    path: join(dir, 'ex2/ex2rc.json'),
+    path: join(dir, 'ex2'),
   },
   config: {
     name: 'config',
-    path: join(dir, 'config/configrc.json'),
+    path: join(dir, 'config'),
     task_rc: {
       ...DEFAULT_TASK_RC,
       name: 'config',
@@ -76,7 +76,9 @@ describe('archivist add', () => {
     await addTask(dir, url, name, path, { accept: 'html,css', interval: '50' }, rc)
 
     // Check written config
-    await expect(readRC<Partial<ArchivistTaskRC>>(path, null)).resolves.toStrictEqual({
+    await expect(
+      readRC<Partial<ArchivistTaskRC>>(join(path, '.taskrc.json'), null),
+    ).resolves.toStrictEqual({
       rc: {
         ...task_rc,
         accept: ['html', 'css'],
@@ -86,7 +88,11 @@ describe('archivist add', () => {
     })
   })
 
-  test.skip('Should fail if path is a file', () => {})
+  test('Should fail if path is a file', async () => {
+    await expect(addTask(dir, url, 'bad-path', join(dir, 'bad-path.zip'), {}, rc)).resolves.toBe(
+      null,
+    )
+  })
 
   test('Should fail if url is invalid', async () => {
     await expect(addTask(dir, 'htt://goog.', 'test-goog', undefined, {}, rc)).resolves.toBe(null)
@@ -109,7 +115,9 @@ describe('archivist config', () => {
   test('should configure tasks', async () => {
     const { path, task_rc } = tasks.ex1
     await expect(configTasks(['ex1'], { disable: true }, rc)).resolves.toStrictEqual(['ex1'])
-    await expect(readRC<Partial<ArchivistTaskRC>>(path, null)).resolves.toStrictEqual({
+    await expect(
+      readRC<Partial<ArchivistTaskRC>>(join(path, '.taskrc.json'), null),
+    ).resolves.toStrictEqual({
       rc: {
         ...task_rc,
         enabled: false,

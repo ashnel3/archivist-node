@@ -19,7 +19,7 @@ export const removeTasks = async (
   return await Promise.all(
     tasks.map(async ({ name, path }) => {
       logger('info', `removing task - ${name}`)
-      await remove([opts?.clean === true ? dirname(path) : path])
+      await remove([path])
       return name
     }),
   )

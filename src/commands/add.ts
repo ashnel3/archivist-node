@@ -1,4 +1,4 @@
-import { join } from 'path'
+import { join, parse } from 'path'
 import { command, createLogger, exists, writeRC } from '../utils'
 import { DEFAULT_TASK_RC } from '../variables'
 import { ArchivistAddOptions, ArchivistRC, ArchivistTaskRC } from '../types'
@@ -23,12 +23,15 @@ export const addTask = async (
   opts: Partial<ArchivistAddOptions>,
   rc: Partial<ArchivistRC>,
 ): Promise<{ name: string; path: string } | null> => {
-  const logger = createLogger(opts?.debug ?? rc?.debug, opts?.quiet ?? rc?.quiet)
   name =
     typeof name === 'undefined'
       ? new URL(url).hostname.replace(/[/\\?@&$!:|#]/, '').replace(/\..+/g, '')
       : name
-  path = typeof path === 'undefined' ? join(dir, 'tasks', name, `.${name}rc.json`) : path
+  const rcPath =
+    typeof path === 'undefined'
+      ? join(dir, 'tasks', name, '.taskrc.json')
+      : join(path, '.taskrc.json')
+  const logger = createLogger(opts?.debug ?? rc?.debug, opts?.quiet ?? rc?.quiet)
 
   // Check if url is valid
   if (
@@ -40,20 +43,26 @@ export const addTask = async (
     return null
   }
 
+  // Check if path is a directory
+  if (typeof path !== 'undefined' && parse(path).ext !== '') {
+    logger('error', `task path must be a directory! - ${path}`)
+    return null
+  }
+
   // Check if task exists
-  if (await exists(path)) {
+  if (await exists(rcPath)) {
     logger('error', `found task - ${name}`)
     return null
   }
 
   // Write task
   logger('info', `adding task - ${name}`)
-  await writeRC<Partial<ArchivistTaskRC>>(path, {
+  await writeRC<Partial<ArchivistTaskRC>>(rcPath, {
     ...DEFAULT_TASK_RC,
     ...command.parseTaskOptions(opts, logger),
     name,
     url,
   })
 
-  return { name, path }
+  return { name, path: rcPath }
 }
