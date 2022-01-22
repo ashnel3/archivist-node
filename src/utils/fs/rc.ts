@@ -37,6 +37,7 @@ export const readRC = async <T = any>(
   path: string,
   def: any,
 ): Promise<{ write: boolean; rc: T }> => {
+  // TODO: Type fs error
   try {
     return { write: false, rc: await readJSON<T>(path) }
   } catch (error) {
@@ -66,6 +67,7 @@ export const remove = async (paths: string[], opts: rimraf.Options = {}): Promis
       })
     })
   }
+  // TODO: delet this
   for (const p of paths) {
     await rimrafAsync(p)
   }

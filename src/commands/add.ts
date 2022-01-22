@@ -2,6 +2,7 @@ import { join, parse } from 'path'
 import { command, createLogger, exists, writeRC } from '../utils'
 import { DEFAULT_TASK_RC } from '../variables'
 import { ArchivistAddOptions, ArchivistRC, ArchivistTaskRC } from '../types'
+import { Command } from 'commander'
 
 // FIXME: path should be a folder
 
@@ -65,4 +66,21 @@ export const addTask = async (
   })
 
   return { name, path: rcPath }
+}
+
+/** Add 'add task' to commander
+ * @param app Commander app
+ * @returns   Configured app
+ */
+export const addTaskCommand = (app: Command): Command => {
+  return app
+    .command('add <url> [name] [dir]')
+    .description('add scheduled task')
+    .option('-i, --interval <int>', 'update interval in hours', '24')
+    .option('-a, --accept <files>', 'accepted files')
+    .option('-r, --reject <files>', 'rejected files')
+    .option('-x, --exclude <dirs>', 'excluded directories')
+    .option('-l, --level', 'maximum recursion depth')
+    .option('-q, --quiet', 'disable console output')
+    .option('--debug', 'Enable debug output')
 }

@@ -1,4 +1,5 @@
 import { dirname } from 'path'
+import { Command } from 'commander'
 import { createLogger } from '../utils/logger'
 import { command, remove } from '../utils'
 import { ArchivistRC, ArchivistRemoveOptions } from '../types'
@@ -23,4 +24,19 @@ export const removeTasks = async (
       return name
     }),
   )
+}
+
+/**
+ * Add remove tasks command to commander
+ * @param app Commander app
+ * @returns   Configured app
+ */
+export const removeTasksCommand = (app: Command): Command => {
+  return app
+    .command('remove <task_names...>')
+    .alias('rm')
+    .description('remove tasks')
+    .option('-c, --clean', 'Remove all downloaded files')
+    .option('-q, --quiet', 'disable console output')
+    .option('--debug', 'Enable debug output')
 }
