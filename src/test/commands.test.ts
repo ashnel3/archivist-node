@@ -1,8 +1,8 @@
 import { join } from 'path'
-import { addTask, configTasks, removeTasks, runTasks } from '../src/commands'
-import { exists, readRC } from '../src/utils'
-import { DEFAULT_RC, DEFAULT_TASK_RC } from '../src/variables'
-import { ArchivistRC, ArchivistTaskRC } from '../src/types'
+import { addTask, configTasks, removeTasks, runTasks } from '../commands'
+import { exists, readRC } from '../utils'
+import { DEFAULT_RC, DEFAULT_TASK_RC } from '../variables'
+import { ArchivistRC, ArchivistTaskRC } from '../types'
 
 if (typeof process.env.HOME === 'undefined') {
   throw new Error('Home environment variable is not set, failed to read configuration!')
