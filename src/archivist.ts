@@ -2,7 +2,18 @@
 
 import { join } from 'path'
 import { Command } from 'commander'
-import { addTask, addTaskCommand, configTasks, configTasksCommand, listTasks, listTasksCommand, removeTasks, removeTasksCommand, runTasks, runTasksCommand } from './commands'
+import {
+  addTask,
+  addTaskCommand,
+  configTasks,
+  configTasksCommand,
+  listTasks,
+  listTasksCommand,
+  removeTasks,
+  removeTasksCommand,
+  runTasks,
+  runTasksCommand,
+} from './commands'
 import { readRC, writeRC } from './utils'
 import { DEFAULT_RC, DEFAULT_TASK_RC, VERSION } from './variables'
 import { ArchivistListOptions, ArchivistRC } from './types'
