@@ -1,1 +1,9 @@
-* text=auto eol=lf
+* text=auto
+
+*.md    eol=lf diff=markdown
+
+*.ts    eol=lf
+*.js    eol=lf
+*.json  eol=lf
+*.sh    eol=lf
+*.py    eol=lf
