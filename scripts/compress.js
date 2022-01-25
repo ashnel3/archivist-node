@@ -13,7 +13,8 @@ if (files.length < 1) {
 tar.c(
   {
     gzip: true,
-    file: archive.startsWith('.tar.gz') ? archive : archive + '.tar.gz',
+    sync: true,
+    file: archive,
   },
   files,
 )

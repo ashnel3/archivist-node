@@ -14,11 +14,9 @@
     "release": "run-s build:typescript build:pkg build:compress",
     "build": "run-s build:typescript build:pkg",
     "build:typescript": "tsc",
-    "build:pkg": "pkg --compress GZip --out-dir dist/bin -t node14 .",
-    "build:pkg-all": "pkg --compress GZip --out-dir dist/bin -t node14-linux,node14-win,node14-mac .",
-    "build:compress": "run-p build:compress-*",
-    "build:compress-bin": "cd dist/bin && node ../../scripts/compress ../archivist-v$npm_package_version *",
-    "build:compress-examples": "cd example && node ../scripts/compress ../dist/archivist-v$npm_package_version-examples *",
+    "build:pkg": "pkg --compress GZip --out-dir dist -t node12 .",
+    "build:pkg-all": "pkg --compress GZip --out-dir dist -t node12-linux,node12-win,node12-mac .",
+    "build:compress": "cpy --parents example/ README.md LICENSE package.json dist/ && cd dist && node ../scripts/compress archivist-v$npm_package_version.tar.gz *",
     "lint": "run-p lint:es lint:typecheck",
     "lint:es": "eslint .",
     "lint:fix": "eslint --fix .",
@@ -29,6 +27,7 @@
     "test:dev": "jest --watch",
     "test:jest": "jest --verbose --silent"
   },
+  "npmClient": "yarn",
   "engines": {
     "node": "<=14"
   },
@@ -65,6 +64,7 @@
     "@types/node": "^16.11.7",
     "@types/rimraf": "^3.0.2",
     "@typescript-eslint/eslint-plugin": "^5.3.1",
+    "cpy-cli": "^3.1.1",
     "eslint": "^7.12.1",
     "eslint-config-prettier": "^8.3.0",
     "eslint-config-standard": "^16.0.3",
