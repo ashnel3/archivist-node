@@ -5,9 +5,12 @@ export type ArchivistOptions =
   | ArchivistRemoveOptions
   | ArchivistRunOptions
 
-export interface ArchivistAddOptions {
+export interface ArchivistBaseOptions {
   quiet: boolean
   debug: boolean
+}
+
+export interface ArchivistAddOptions extends ArchivistBaseOptions {
   interval: string
   accept: string
   reject: string
@@ -15,9 +18,7 @@ export interface ArchivistAddOptions {
   level: string
 }
 
-export interface ArchivistConfigOptions {
-  quiet: boolean
-  debug: boolean
+export interface ArchivistConfigOptions extends ArchivistBaseOptions {
   interval: string
   accept: string
   reject: string
@@ -31,13 +32,8 @@ export interface ArchivistListOptions {
   debug: boolean
 }
 
-export interface ArchivistRemoveOptions {
+export interface ArchivistRemoveOptions extends ArchivistBaseOptions {
   clean: boolean
-  quiet: boolean
-  debug: boolean
 }
 
-export interface ArchivistRunOptions {
-  quiet: boolean
-  debug: boolean
-}
+export interface ArchivistRunOptions extends ArchivistBaseOptions {}

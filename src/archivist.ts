@@ -97,7 +97,7 @@ void (async () => {
   })
 
   runTasksCommand(app).action(async (names, opts) => {
-    console.log(names, opts)
+    await runTasks(names ?? [], opts, rc)
   })
 
   // Handle process events
